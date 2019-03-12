@@ -35,6 +35,17 @@ function practicaInit(db){
         )
     });
 
+    router.get('/bytags/:tag', (req, res, next)=>{
+        practicaModel.searchByTag((req.params.tag || '').split('_'), (err, docs)=>{
+          if(err){
+            console.log(err);
+            return res.status(500).json({"error":"No se encontro practica"});
+          }else{
+            return res.status(200).json(docs);
+          }
+        } ); //searchByTag
+      });//by tag
+
     router.post("/new", function(req, res, next){
         var _practicaDatos = Object.assign({}, practicaDatos, req.body);
         
@@ -49,6 +60,17 @@ function practicaInit(db){
         });
     });
 
+    router.put('/done/:id', function(req, res, next){
+        var _practicaId = req.params.id;
+        practicaModel.togglePractica(_practicaId, (err, rs)=>{
+          if(err){
+            console.log(err);
+            return res.status(500).json({"error":"No se pudo actualizar"});
+          }
+          return res.status(200).json(rs);
+        });
+    });
+
     router.put('/addtags/:id', (req, res, next)=>{
         practicaModel.addTagsToPractica((req.body.tags || '').split('|'), req.params.id, (err, rs)=>{
             if(err){
@@ -59,6 +81,18 @@ function practicaInit(db){
               }
         });//end addTagsToPractica
     });//addTags
+
+    router.delete('/delete/:id', function(req, res, next){
+        var _practicaID = req.params.id;
+        practicaModel.deleteById(_practicaID, (err, rs) =>{
+            if(err){
+                return res.status(500).json({"error":"No se pudo eliminar dato"});
+            }else{
+                return res.status(200).json(rs);
+            }
+        })
+    });
+      
 
     return router;
 }

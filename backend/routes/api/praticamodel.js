@@ -49,6 +49,58 @@ function practicaModel(db){
         });//updateOne
     }//addTagsToPractica
 
+    lib.searchByTag = (tags, handler)=>{
+        var queryObject= {"tags": {"$in": Array.isArray(tags)? tags: [tags]}};
+        query.find(queryObject).toArray((err, docs) => {
+            if(err){
+                handler(err, null);
+            }else{
+                handler(null, docs);
+            }
+        });//toArray
+    }//searchByTag
+
+    lib.togglePractica = (id, handler) => {
+        var filter = {"_id": ObjectId(id)};
+        // get filered document
+        query.findOne(filter, (err, docs) => {
+          if(err) {
+            handler(err, null);
+          } else {
+              if(docs){
+                  //doc.done = !doc.done;
+                  //doc.fcDone = new Date();
+                  var updateExpression = {};
+                  if(docs.done){
+                      updateExpression = {"$set": {done : false }};
+                  }else{
+                      updateExpression = { "$set": { done: true}};
+                  }
+                  query.updateOne(filter, updateExpression, (err, rs)=> {
+                      if(err) {
+                        handler(err, null);
+                      }else{
+                        handler(null, rs.result);
+                      }
+                  });//updateOne
+              }else{
+                handler(new Error("El documento no Existe"), null)
+              }
+          }
+        } );//findOne
+      }
+
+      lib.deleteById = (id, handler)=>{
+        query.deleteOne({"_id": ObjectId(id)}, (err, rs)=>{
+          if(err){
+            console.log(err);
+            handler(err, null);
+          } else {
+            handler(null, rs.result);
+          }
+        });//deleteOne
+      }//deleteById
+
     return lib;
 }
 
